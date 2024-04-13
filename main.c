@@ -35,6 +35,12 @@ int main(int argc, char **argv) {
             if (len < 0)
                 return -1;
             printf("sd %d, (%d)%d\n", operands.rs1, operands.imm, operands.rs2);
+        } else if (strcmp(op, "beq") == 0) {
+            struct B operands;
+            ssize_t len = getB(lines[i], op_size, &operands);
+            if (len < 0)
+                return -1;
+            printf("beq %d, %d, %d\n", operands.rs1, operands.rs2, operands.imm);
         }
     }
 }
