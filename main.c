@@ -318,8 +318,9 @@ int read_lines(char *path, char **lines[]) {
     int number_of_lines = 0;
     int capacity = 2;
     *lines = (char **)malloc(capacity * sizeof(char *));
-    ssize_t read; // TODO: Delete
-    while ((read = getline(&(*lines)[number_of_lines++], &len, fp)) != -1) {
+    while (getline(&(*lines)[number_of_lines++], &len, fp) != -1) {
+        if ((*lines)[number_of_lines-1][0] == '#')
+            --number_of_lines;
         if (number_of_lines >= capacity) {
             capacity *= 2;
             *lines = (char **)realloc(*lines, capacity * sizeof(char *));
