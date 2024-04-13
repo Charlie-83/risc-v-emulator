@@ -1,9 +1,9 @@
+#include "decode.h"
+#include "regs.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "decode.h"
-#include "regs.h"
 
 int read_lines(char *path, char **lines[]);
 ssize_t get_op(char *line, char **op);
@@ -20,17 +20,21 @@ int main(int argc, char **argv) {
             ssize_t len = getI(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("addi %d, %d, %d\n", operands.rd, operands.rs1,
-                   operands.imm);
+            printf("addi %d, %d, %d\n", operands.rd, operands.rs1, operands.imm);
             regs[operands.rd] = regs[operands.rs1] + operands.imm;
         } else if (strcmp(op, "add") == 0) {
             struct R operands;
             ssize_t len = getR(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("add %d, %d, %d\n", operands.rd, operands.rs1,
-                   operands.rs2);
+            printf("add %d, %d, %d\n", operands.rd, operands.rs1, operands.rs2);
             regs[operands.rd] = regs[operands.rs1] + regs[operands.rs2];
+        } else if (strcmp(op, "sd") == 0) {
+            struct S operands;
+            ssize_t len = getS(lines[i], op_size, &operands);
+            if (len < 0)
+                return -1;
+            printf("sd %d, (%d)%d\n", operands.rs1, operands.imm, operands.rs2);
         }
     }
 }
@@ -66,4 +70,3 @@ ssize_t get_op(char *line, char **op) {
     printf("Couldn't find op in line %s", line);
     return -1;
 }
-

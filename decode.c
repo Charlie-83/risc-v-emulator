@@ -1,6 +1,6 @@
 #include "decode.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 ssize_t getR(char *line, int i, struct R *r_struct) {
     size_t len = strlen(line);
@@ -56,6 +56,123 @@ ssize_t getI(char *line, int i, struct I *i_struct) {
     i_struct->rd = rd;
     i_struct->rs1 = rs1;
     i_struct->imm = imm;
+    return i;
+}
+
+ssize_t getS(char *line, int i, struct S *s_struct) {
+    size_t len = strlen(line);
+    enum regs rs1, rs2;
+    int16_t imm;
+    ssize_t reg_len = get_reg(line, i, &rs1);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    char *endptr;
+    imm = strtol(line + i, &endptr, 10);
+    i += endptr - (line + i);
+    if (line[i++] != '(') {
+        printf("Expected ( at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    reg_len = get_reg(line, i, &rs2);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ')') {
+        printf("Expected ) at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    s_struct->rs1 = rs1;
+    s_struct->rs2 = rs2;
+    s_struct->imm = imm;
+    return i;
+}
+
+ssize_t getB(char *line, int i, struct B *b_struct) {
+    size_t len = strlen(line);
+    enum regs rd, rs1;
+    int16_t imm;
+    ssize_t reg_len = get_reg(line, i, &rd);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    reg_len = get_reg(line, i, &rs1);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    char *endptr;
+    imm = strtol(line + i, &endptr, 10);
+    // b_struct->rd = rd;
+    b_struct->rs1 = rs1;
+    b_struct->imm = imm;
+    return i;
+}
+
+ssize_t getU(char *line, int i, struct U *u_struct) {
+    size_t len = strlen(line);
+    enum regs rd, rs1;
+    int16_t imm;
+    ssize_t reg_len = get_reg(line, i, &rd);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    reg_len = get_reg(line, i, &rs1);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    char *endptr;
+    imm = strtol(line + i, &endptr, 10);
+    u_struct->rd = rd;
+    // u_struct->rs1 = rs1;
+    u_struct->imm = imm;
+    return i;
+}
+
+ssize_t getJ(char *line, int i, struct J *j_struct) {
+    size_t len = strlen(line);
+    enum regs rd, rs1;
+    int16_t imm;
+    ssize_t reg_len = get_reg(line, i, &rd);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    reg_len = get_reg(line, i, &rs1);
+    if (reg_len == -1)
+        return -1;
+    i += reg_len;
+    if (line[i++] != ',') {
+        printf("Expected comma at position %d in line: %s", i - 1, line);
+        return -1;
+    }
+    char *endptr;
+    imm = strtol(line + i, &endptr, 10);
+    j_struct->rd = rd;
+    // j_struct->rs1 = rs1;
+    j_struct->imm = imm;
     return i;
 }
 
