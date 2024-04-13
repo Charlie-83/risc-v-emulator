@@ -12,6 +12,7 @@ int main(int argc, char **argv) {
     char **lines;
     int number_of_lines = read_lines(argv[1], &lines);
     int32_t regs[pc + 1];
+    int8_t memory[1024];
     for (int i = 0; i < number_of_lines; ++i) {
         char *op;
         size_t op_size = get_op(lines[i], &op);
@@ -20,40 +21,43 @@ int main(int argc, char **argv) {
             ssize_t len = getI(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("addi %d, %d, %d\n", operands.rd, operands.rs1, operands.imm);
             regs[operands.rd] = regs[operands.rs1] + operands.imm;
         } else if (strcmp(op, "add") == 0) {
             struct R operands;
             ssize_t len = getR(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("add %d, %d, %d\n", operands.rd, operands.rs1, operands.rs2);
             regs[operands.rd] = regs[operands.rs1] + regs[operands.rs2];
-        } else if (strcmp(op, "sd") == 0) {
+        } else if (strcmp(op, "sw") == 0) {
             struct S operands;
             ssize_t len = getS(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("sd %d, (%d)%d\n", operands.rs1, operands.imm, operands.rs2);
+            memory[regs[operands.rs2] + operands.imm] = regs[operands.rs1];
         } else if (strcmp(op, "beq") == 0) {
             struct B operands;
             ssize_t len = getB(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("beq %d, %d, %d\n", operands.rs1, operands.rs2, operands.imm);
+            if (regs[operands.rs1] == regs[operands.rs2])
+                regs[pc] += operands.imm;
         } else if (strcmp(op, "lui") == 0) {
             struct U operands;
             ssize_t len = getU(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("lui %d, %d\n", operands.rd, operands.imm);
+            regs[operands.rd] = operands.imm << 12;
         } else if (strcmp(op, "jal") == 0) {
             struct J operands;
             ssize_t len = getJ(lines[i], op_size, &operands);
             if (len < 0)
                 return -1;
-            printf("jal %d, %d\n", operands.rd, operands.imm);
-        } 
+            regs[operands.rd] = regs[pc] + 4;
+            regs[pc] += operands.imm;
+        } else {
+            printf("Unrecognised instruction %s", op);
+            return -1;
+        }
     }
 }
 
