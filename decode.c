@@ -122,17 +122,9 @@ ssize_t getB(char *line, int i, struct B *b_struct) {
 
 ssize_t getU(char *line, int i, struct U *u_struct) {
     size_t len = strlen(line);
-    enum regs rd, rs1;
+    enum regs rd;
     int16_t imm;
     ssize_t reg_len = get_reg(line, i, &rd);
-    if (reg_len == -1)
-        return -1;
-    i += reg_len;
-    if (line[i++] != ',') {
-        printf("Expected comma at position %d in line: %s", i - 1, line);
-        return -1;
-    }
-    reg_len = get_reg(line, i, &rs1);
     if (reg_len == -1)
         return -1;
     i += reg_len;
@@ -143,7 +135,6 @@ ssize_t getU(char *line, int i, struct U *u_struct) {
     char *endptr;
     imm = strtol(line + i, &endptr, 10);
     u_struct->rd = rd;
-    // u_struct->rs1 = rs1;
     u_struct->imm = imm;
     return i;
 }

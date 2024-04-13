@@ -41,6 +41,12 @@ int main(int argc, char **argv) {
             if (len < 0)
                 return -1;
             printf("beq %d, %d, %d\n", operands.rs1, operands.rs2, operands.imm);
+        } else if (strcmp(op, "lui") == 0) {
+            struct U operands;
+            ssize_t len = getU(lines[i], op_size, &operands);
+            if (len < 0)
+                return -1;
+            printf("lui %d, %d\n", operands.rd, operands.imm);
         }
     }
 }
