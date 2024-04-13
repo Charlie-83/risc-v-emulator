@@ -47,7 +47,13 @@ int main(int argc, char **argv) {
             if (len < 0)
                 return -1;
             printf("lui %d, %d\n", operands.rd, operands.imm);
-        }
+        } else if (strcmp(op, "jal") == 0) {
+            struct J operands;
+            ssize_t len = getJ(lines[i], op_size, &operands);
+            if (len < 0)
+                return -1;
+            printf("jal %d, %d\n", operands.rd, operands.imm);
+        } 
     }
 }
 
