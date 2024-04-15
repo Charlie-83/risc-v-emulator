@@ -168,97 +168,176 @@ ssize_t get_reg(char *line, int i, enum regs *reg) {
     if (strncmp("x0", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x0;
-    } else if (strncmp("x4", line + i, 2) == 0) {
+    } else if (strncmp("zero", line + i, 4) == 0) {
+        reg_len += 4;
+        *reg = x0;
+    } else if (strncmp("x4", line + i, 2) == 0 || strncmp("tp", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x4;
-    } else if (strncmp("x5", line + i, 2) == 0) {
+    } else if (strncmp("x5", line + i, 2) == 0 || strncmp("t0", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x5;
-    } else if (strncmp("x6", line + i, 2) == 0) {
+    } else if (strncmp("x6", line + i, 2) == 0 || strncmp("t1", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x6;
-    } else if (strncmp("x7", line + i, 2) == 0) {
+    } else if (strncmp("x7", line + i, 2) == 0 || strncmp("t2", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x1;
-    } else if (strncmp("x8", line + i, 2) == 0) {
+    } else if (strncmp("x8", line + i, 2) == 0 || strncmp("s0", line + i, 2) == 0 ||
+               strncmp("fp", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x8;
-    } else if (strncmp("x9", line + i, 2) == 0) {
+    } else if (strncmp("x9", line + i, 2) == 0 || strncmp("s1", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x9;
     } else if (strncmp("x10", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x10;
+    } else if (strncmp("a0", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x10;
     } else if (strncmp("x11", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x11;
+    } else if (strncmp("a1", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x11;
     } else if (strncmp("x12", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x12;
+    } else if (strncmp("a2", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x12;
     } else if (strncmp("x13", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x13;
+    } else if (strncmp("a3", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x13;
     } else if (strncmp("x14", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x14;
+    } else if (strncmp("a4", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x14;
     } else if (strncmp("x15", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x15;
+    } else if (strncmp("a5", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x15;
     } else if (strncmp("x16", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x16;
+    } else if (strncmp("a6", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x16;
     } else if (strncmp("x17", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x17;
+    } else if (strncmp("a7", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x17;
     } else if (strncmp("x18", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x18;
+    } else if (strncmp("s2", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x18;
     } else if (strncmp("x19", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x19;
+    } else if (strncmp("s3", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x19;
     } else if (strncmp("x20", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x20;
+    } else if (strncmp("s4", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x20;
     } else if (strncmp("x21", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x21;
+    } else if (strncmp("s5", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x21;
     } else if (strncmp("x22", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x22;
+    } else if (strncmp("s6", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x22;
     } else if (strncmp("x23", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x23;
+    } else if (strncmp("s7", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x23;
     } else if (strncmp("x24", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x24;
+    } else if (strncmp("s8", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x24;
     } else if (strncmp("x25", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x25;
+    } else if (strncmp("s9", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x25;
     } else if (strncmp("x26", line + i, 3) == 0) {
+        reg_len += 3;
+        *reg = x26;
+    } else if (strncmp("s10", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x26;
     } else if (strncmp("x27", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x27;
+    } else if (strncmp("s11", line + i, 3) == 0) {
+        reg_len += 3;
+        *reg = x27;
     } else if (strncmp("x28", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x28;
+    } else if (strncmp("t3", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x28;
     } else if (strncmp("x29", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x29;
+    } else if (strncmp("t4", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x29;
     } else if (strncmp("x30", line + i, 3) == 0) {
         reg_len += 3;
+        *reg = x30;
+    } else if (strncmp("t5", line + i, 2) == 0) {
+        reg_len += 2;
         *reg = x30;
     } else if (strncmp("x31", line + i, 3) == 0) {
         reg_len += 3;
         *reg = x31;
+    } else if (strncmp("t6", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x31;
     } else if (strncmp("x1", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x1;
+    } else if (strncmp("ra", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x1;
     } else if (strncmp("x2", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x2;
+    } else if (strncmp("sp", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x2;
     } else if (strncmp("x3", line + i, 2) == 0) {
+        reg_len += 2;
+        *reg = x3;
+    } else if (strncmp("gp", line + i, 2) == 0) {
         reg_len += 2;
         *reg = x3;
     } else if (strncmp("pc", line + i, 2) == 0) {

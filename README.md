@@ -5,7 +5,6 @@
 ### TODO
 
 - Labels
-- ABI register names
 - Pseudo instructions
 
 ### Extensions
