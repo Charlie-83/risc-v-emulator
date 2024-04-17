@@ -182,7 +182,7 @@ ssize_t get_reg(char *line, int i, enum regs *reg) {
         *reg = x6;
     } else if (strncmp("x7", line + i, 2) == 0 || strncmp("t2", line + i, 2) == 0) {
         reg_len += 2;
-        *reg = x1;
+        *reg = x7;
     } else if (strncmp("x8", line + i, 2) == 0 || strncmp("s0", line + i, 2) == 0 ||
                strncmp("fp", line + i, 2) == 0) {
         reg_len += 2;
@@ -344,6 +344,7 @@ ssize_t get_reg(char *line, int i, enum regs *reg) {
         reg_len += 2;
         *reg = x1;
     } else {
+        printf("Unrecognised register in line %s", line);
         return -1;
     }
     return reg_len;

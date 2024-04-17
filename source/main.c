@@ -1,17 +1,19 @@
 #include "decode.h"
 #include "instructions.h"
 #include "regs.h"
+#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-int read_lines(char *path, char **lines[]);
+int read_lines(char *path, char **lines[], char **labels[]);
 ssize_t get_op(char *line, enum instruction *op);
 
 int main(int argc, char **argv) {
     char **lines;
-    int number_of_lines = read_lines(argv[1], &lines);
+    char **labels;
+    int number_of_lines = read_lines(argv[1], &lines, &labels);
     int32_t regs[pc + 1] = {0};
     int8_t memory[1024] = {0};
     while (regs[pc] < number_of_lines * 4) {
@@ -311,16 +313,43 @@ int main(int argc, char **argv) {
         printf("%d: %d\n", i, regs[i]);
 }
 
-int read_lines(char *path, char **lines[]) {
+int read_lines(char *path, char **lines[], char **labels[]) {
     FILE *fp = fopen(path, "r");
     char *line = NULL;
     size_t len = 0;
     int number_of_lines = 0;
     int capacity = 2;
     *lines = (char **)malloc(capacity * sizeof(char *));
+    *labels = (char **)malloc(capacity * sizeof(char *));
     while (getline(&(*lines)[number_of_lines++], &len, fp) != -1) {
-        if ((*lines)[number_of_lines-1][0] == '#')
+        char *line = (*lines)[number_of_lines - 1];
+        if (line[0] == '#') {
             --number_of_lines;
+            continue;
+        }
+        enum { prelabel, inlabel, postlabel } state = prelabel;
+        char *label = (char *)malloc(strlen(line) * sizeof(char));
+        int label_i = 0;
+        for (int i = 0; i < strlen(line); ++i) {
+            if (state == prelabel && isspace((int)line[i]))
+                continue;
+            else if (state == prelabel) {
+                state = inlabel;
+                label[label_i++] = line[i];
+            } else if (state == inlabel && isalnum(line[i])) {
+                label[label_i++] = line[i];
+            } else if (state == inlabel && line[i] == ':') {
+                state = postlabel;
+                label[label_i] = '\0';
+                (*labels)[--number_of_lines] = label;
+            } else if (state == postlabel && !isspace(line[i])) {
+                printf("Cannot interpret label: %s", line);
+                return -1;
+            }
+        }
+        if (state != postlabel)
+            free(label);
+
         if (number_of_lines >= capacity) {
             capacity *= 2;
             *lines = (char **)realloc(*lines, capacity * sizeof(char *));
@@ -332,88 +361,99 @@ int read_lines(char *path, char **lines[]) {
 
 ssize_t get_op(char *line, enum instruction *op) {
     size_t len = strlen(line);
+    enum { preop, inop } state = preop;
+    int spaces = 0;
     for (int j = 0; j < len; ++j) {
-        if (line[j] != ' ')
+        if (isspace(line[j]) && state == preop) {
+            ++spaces;
             continue;
+        } else if (isalpha(line[j])) {
+            state = inop;
+            continue;
+        }
         // TODO: Currently addi matches add
-        if (strncmp(line, "add", j) == 0)
+        if (strncmp(line + spaces, "add", j - spaces) == 0)
             *op = add;
-        else if (strncmp(line, "sub", j) == 0)
+        else if (strncmp(line + spaces, "sub", j - spaces) == 0)
             *op = sub;
-        else if (strncmp(line, "xor", j) == 0)
+        else if (strncmp(line + spaces, "xor", j - spaces) == 0)
             *op = _xor;
-        else if (strncmp(line, "or", j) == 0)
+        else if (strncmp(line + spaces, "or", j - spaces) == 0)
             *op = _or;
-        else if (strncmp(line, "and", j) == 0)
+        else if (strncmp(line + spaces, "and", j - spaces) == 0)
             *op = _and;
-        else if (strncmp(line, "sll", j) == 0)
+        else if (strncmp(line + spaces, "sll", j - spaces) == 0)
             *op = sll;
-        else if (strncmp(line, "srl", j) == 0)
+        else if (strncmp(line + spaces, "srl", j - spaces) == 0)
             *op = srl;
-        else if (strncmp(line, "sra", j) == 0)
+        else if (strncmp(line + spaces, "sra", j - spaces) == 0)
             *op = sra;
-        else if (strncmp(line, "slt", j) == 0)
+        else if (strncmp(line + spaces, "slt", j - spaces) == 0)
             *op = slt;
-        else if (strncmp(line, "sltu", j) == 0)
+        else if (strncmp(line + spaces, "sltu", j - spaces) == 0)
             *op = sltu;
-        else if (strncmp(line, "addi", j) == 0)
+        else if (strncmp(line + spaces, "addi", j - spaces) == 0)
             *op = addi;
-        else if (strncmp(line, "xori", j) == 0)
+        else if (strncmp(line + spaces, "xori", j - spaces) == 0)
             *op = xori;
-        else if (strncmp(line, "ori", j) == 0)
+        else if (strncmp(line + spaces, "ori", j - spaces) == 0)
             *op = ori;
-        else if (strncmp(line, "andi", j) == 0)
+        else if (strncmp(line + spaces, "andi", j - spaces) == 0)
             *op = andi;
-        else if (strncmp(line, "slli", j) == 0)
+        else if (strncmp(line + spaces, "slli", j - spaces) == 0)
             *op = slli;
-        else if (strncmp(line, "srli", j) == 0)
+        else if (strncmp(line + spaces, "srli", j - spaces) == 0)
             *op = srli;
-        else if (strncmp(line, "srai", j) == 0)
+        else if (strncmp(line + spaces, "srai", j - spaces) == 0)
             *op = srai;
-        else if (strncmp(line, "slti", j) == 0)
+        else if (strncmp(line + spaces, "slti", j - spaces) == 0)
             *op = slti;
-        else if (strncmp(line, "sltiu", j) == 0)
+        else if (strncmp(line + spaces, "sltiu", j - spaces) == 0)
             *op = sltiu;
-        else if (strncmp(line, "lb", j) == 0)
+        else if (strncmp(line + spaces, "lb", j - spaces) == 0)
             *op = lb;
-        else if (strncmp(line, "lh", j) == 0)
+        else if (strncmp(line + spaces, "lh", j - spaces) == 0)
             *op = lh;
-        else if (strncmp(line, "lw", j) == 0)
+        else if (strncmp(line + spaces, "lw", j - spaces) == 0)
             *op = lw;
-        else if (strncmp(line, "lbu", j) == 0)
+        else if (strncmp(line + spaces, "lbu", j - spaces) == 0)
             *op = lbu;
-        else if (strncmp(line, "lhu", j) == 0)
+        else if (strncmp(line + spaces, "lhu", j - spaces) == 0)
             *op = lhu;
-        else if (strncmp(line, "sb", j) == 0)
+        else if (strncmp(line + spaces, "sb", j - spaces) == 0)
             *op = sb;
-        else if (strncmp(line, "sh", j) == 0)
+        else if (strncmp(line + spaces, "sh", j - spaces) == 0)
             *op = sh;
-        else if (strncmp(line, "sw", j) == 0)
+        else if (strncmp(line + spaces, "sw", j - spaces) == 0)
             *op = sw;
-        else if (strncmp(line, "beq", j) == 0)
+        else if (strncmp(line + spaces, "beq", j - spaces) == 0)
             *op = beq;
-        else if (strncmp(line, "bne", j) == 0)
+        else if (strncmp(line + spaces, "bne", j - spaces) == 0)
             *op = bne;
-        else if (strncmp(line, "blt", j) == 0)
+        else if (strncmp(line + spaces, "blt", j - spaces) == 0)
             *op = blt;
-        else if (strncmp(line, "bge", j) == 0)
+        else if (strncmp(line + spaces, "bge", j - spaces) == 0)
             *op = bge;
-        else if (strncmp(line, "bltu", j) == 0)
+        else if (strncmp(line + spaces, "bltu", j - spaces) == 0)
             *op = bltu;
-        else if (strncmp(line, "bgeu", j) == 0)
+        else if (strncmp(line + spaces, "bgeu", j - spaces) == 0)
             *op = bgeu;
-        else if (strncmp(line, "jal", j) == 0)
+        else if (strncmp(line + spaces, "jal", j - spaces) == 0)
             *op = jal;
-        else if (strncmp(line, "jalr", j) == 0)
+        else if (strncmp(line + spaces, "jalr", j - spaces) == 0)
             *op = jalr;
-        else if (strncmp(line, "lui", j) == 0)
+        else if (strncmp(line + spaces, "lui", j - spaces) == 0)
             *op = lui;
-        else if (strncmp(line, "auipc", j) == 0)
+        else if (strncmp(line + spaces, "auipc", j - spaces) == 0)
             *op = auipc;
-        else if (strncmp(line, "ecall", j) == 0)
+        else if (strncmp(line + spaces, "ecall", j - spaces) == 0)
             *op = ecall;
-        else if (strncmp(line, "ebreak", j) == 0)
+        else if (strncmp(line + spaces, "ebreak", j - spaces) == 0)
             *op = ebreak;
+        else {
+            printf("Couldn't find op in line %s", line);
+            return -1;
+        }
         return j;
     }
     printf("Couldn't find op in line %s", line);
